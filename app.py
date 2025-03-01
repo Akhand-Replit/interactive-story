@@ -283,7 +283,7 @@ def main():
             if selected_genre_key in lotties and lotties[selected_genre_key]:
                 st_lottie.st_lottie(lotties[selected_genre_key], key=f"lottie_{selected_genre_key}", height=300)
             else:
-                st.image("https://via.placeholder.com/400x300?text=Interactive+Story+Adventure", use_column_width=True)
+                st.image("https://via.placeholder.com/400x300?text=Interactive+Story+Adventure", use_container_width=True)
     
     # Game in progress
     elif st.session_state.start_game and not st.session_state.game_over:
