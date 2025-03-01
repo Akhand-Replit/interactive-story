@@ -215,7 +215,7 @@ def main():
         if st.button("Reset Game"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
-            st.experimental_rerun()
+            st.rerun()
             
         st.markdown("---")
         st.markdown("### How to Play")
@@ -281,7 +281,7 @@ def main():
                         st.session_state.choices = initial_choices
                     
                     st.session_state.start_game = True
-                    st.experimental_rerun()
+                    st.rerun()
                 except Exception as e:
                     st.error(f"Error starting the game: {str(e)}. Please check if the Hugging Face API key is correctly set in the secrets.")
             
@@ -337,7 +337,7 @@ def main():
                         new_choices = generate_choices(next_scene, st.session_state.genre)
                         st.session_state.choices = new_choices
                 
-                st.experimental_rerun()
+                st.rerun()
                 
         with col2:
             if st.button(st.session_state.choices.get("choice2", "Option 2"), key="btn_choice2", help="Select this path for your story"):
@@ -365,7 +365,7 @@ def main():
                         new_choices = generate_choices(next_scene, st.session_state.genre)
                         st.session_state.choices = new_choices
                 
-                st.experimental_rerun()
+                st.rerun()
     
     # Game over screen
     elif st.session_state.game_over:
@@ -408,7 +408,7 @@ def main():
         if st.button("Play Again with a New Story"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
-            st.experimental_rerun()
+            st.rerun()
     
     # Footer
     st.markdown("""
