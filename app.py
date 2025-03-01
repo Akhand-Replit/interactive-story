@@ -8,7 +8,6 @@ import io
 import base64
 import pandas as pd
 import streamlit_lottie as st_lottie
-from huggingface_hub import InferenceClient
 
 # Set page configuration
 st.set_page_config(
@@ -70,44 +69,51 @@ def get_lotties():
     }
     return lotties
 
-# Function to generate story using Hugging Face's InferenceClient (DeepSeek-R1 model)
-def generate_story(prompt, model="deepseek-ai/DeepSeek-R1"):
+# Function to generate story using Gemini API
+def generate_story(prompt, model="gemini-1.5-flash"):
     try:
         # Get API key from Streamlit secrets
-        api_key = st.secrets["huggingface"]["api_key"]
-        provider = st.secrets["huggingface"]["provider"]
+        api_key = st.secrets["gemini"]["api_key"]
         
-        # Initialize the client
-        client = InferenceClient(
-            provider=provider,
-            api_key=api_key
-        )
+        # Set up the API endpoint
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         
-        # Create messages for the chat completion
-        messages = [
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
+        # Prepare the request payload
+        payload = {
+            "contents": [{
+                "parts": [{"text": prompt}]
+            }]
+        }
         
-        # Generate completion
-        completion = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            max_tokens=250,
-            temperature=0.7,
-            top_p=0.9
-        )
+        # Set headers
+        headers = {
+            "Content-Type": "application/json"
+        }
         
-        # Return the generated text
-        return completion.choices[0].message.content
+        # Make the API request
+        response = requests.post(url, headers=headers, json=payload)
+        
+        # Check if request was successful
+        if response.status_code != 200:
+            raise Exception(f"API request failed with status code: {response.status_code}, response: {response.text}")
+        
+        # Parse the response
+        result = response.json()
+        
+        # Extract the generated text
+        if (result and "candidates" in result and len(result["candidates"]) > 0 and
+                "content" in result["candidates"][0] and "parts" in result["candidates"][0]["content"] and
+                len(result["candidates"][0]["content"]["parts"]) > 0):
+            return result["candidates"][0]["content"]["parts"][0]["text"]
+        else:
+            raise Exception("Unexpected response structure from Gemini API")
+            
     except Exception as e:
         st.error(f"Error generating story: {str(e)}")
         return f"Error generating story. Please check your API configuration. Error: {str(e)}"
 
 # Function to generate story choices
-def generate_choices(current_scene, genre, api_key):
+def generate_choices(current_scene, genre):
     prompt = f"""
     Given the following scene in a {genre} story:
     
@@ -123,7 +129,7 @@ def generate_choices(current_scene, genre, api_key):
     """
     
     try:
-        result = generate_story(prompt, api_key)
+        result = generate_story(prompt)
         # Extract JSON from the response
         json_str = result.strip()
         if not json_str.startswith('{'):
@@ -140,6 +146,7 @@ def generate_choices(current_scene, genre, api_key):
         choices = json.loads(json_str)
         return choices
     except Exception as e:
+        st.warning(f"Error generating choices: {str(e)}. Using fallback choices.")
         # Fallback to default choices if there's an error
         return {
             "choice1": "Continue cautiously and investigate further",
@@ -208,7 +215,7 @@ def main():
         if st.button("Reset Game"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
-            st.rerun()
+            st.experimental_rerun()
             
         st.markdown("---")
         st.markdown("### How to Play")
@@ -274,16 +281,16 @@ def main():
                         st.session_state.choices = initial_choices
                     
                     st.session_state.start_game = True
-                    st.rerun()
+                    st.experimental_rerun()
                 except Exception as e:
                     st.error(f"Error starting the game: {str(e)}. Please check if the Hugging Face API key is correctly set in the secrets.")
-                
+            
         with col2:
             # Display the Lottie animation for the selected genre
             if selected_genre_key in lotties and lotties[selected_genre_key]:
                 st_lottie.st_lottie(lotties[selected_genre_key], key=f"lottie_{selected_genre_key}", height=300)
             else:
-                st.image("https://via.placeholder.com/400x300?text=Interactive+Story+Adventure", use_container_width=True)
+                st.image("https://via.placeholder.com/400x300?text=Interactive+Story+Adventure", use_column_width=True)
     
     # Game in progress
     elif st.session_state.start_game and not st.session_state.game_over:
@@ -330,7 +337,7 @@ def main():
                         new_choices = generate_choices(next_scene, st.session_state.genre)
                         st.session_state.choices = new_choices
                 
-                st.rerun()
+                st.experimental_rerun()
                 
         with col2:
             if st.button(st.session_state.choices.get("choice2", "Option 2"), key="btn_choice2", help="Select this path for your story"):
@@ -358,7 +365,7 @@ def main():
                         new_choices = generate_choices(next_scene, st.session_state.genre)
                         st.session_state.choices = new_choices
                 
-                st.rerun()
+                st.experimental_rerun()
     
     # Game over screen
     elif st.session_state.game_over:
@@ -401,7 +408,7 @@ def main():
         if st.button("Play Again with a New Story"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
-            st.rerun()
+            st.experimental_rerun()
     
     # Footer
     st.markdown("""
