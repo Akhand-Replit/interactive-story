@@ -122,7 +122,7 @@ def generate_choices(current_scene, genre):
     
     {current_scene}
     
-    Generate two distinct and interesting choices for the protagonist. Each choice should lead the story in a different direction.
+    Generate two relative distinct and very interesting choices for the protagonist. Each choice should lead the story in a different direction.
     Format your response as a JSON object with two choices like this:
     {{
         "choice1": "Brief description of first choice (10-15 words)",
@@ -166,7 +166,7 @@ def generate_next_scene(current_scene, chosen_choice, genre):
     
     The protagonist decides to: {chosen_choice}
     
-    Continue the story with an engaging scene (150-200 words) based on this choice. Make it vivid and immersive.
+    Continue the story with an engaging scene (100-150 words) based on this choice. Make it relatively vivid and immersive.
     Write this in Bengali (Bangla) language only.
     """
     
@@ -271,7 +271,7 @@ def main():
                 # Generate initial scene
                 initial_prompt = f"""
                 Create an engaging opening scene for a {selected_genre_key} story where the protagonist is named {player_name}.
-                Set the scene (about 150 words) with an interesting situation that will lead to choices.
+                Set the scene (about 100 words) with an interesting situation that will lead to choices.
                 Make it immersive and end at a point where the protagonist needs to make a decision.
                 Write this in Bengali (Bangla) language only.
                 """
