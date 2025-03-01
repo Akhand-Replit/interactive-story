@@ -3,3 +3,4 @@ requests
 Pillow
 pandas
 streamlit-lottie
+huggingface-hub
