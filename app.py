@@ -11,7 +11,7 @@ import streamlit_lottie as st_lottie
 
 # Set page configuration
 st.set_page_config(
-    page_title="Interactive Story Adventure",
+    page_title="ইন্টারেক্টিভ গল্প অ্যাডভেঞ্চার",  # Interactive Story Adventure in Bengali
     page_icon="📖",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -78,10 +78,13 @@ def generate_story(prompt, model="gemini-1.5-flash"):
         # Set up the API endpoint
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         
+        # Modify prompt to request Bengali language
+        bengali_prompt = f"Please respond in Bengali (Bangla) language only: {prompt}"
+        
         # Prepare the request payload
         payload = {
             "contents": [{
-                "parts": [{"text": prompt}]
+                "parts": [{"text": bengali_prompt}]
             }]
         }
         
@@ -126,6 +129,7 @@ def generate_choices(current_scene, genre):
         "choice2": "Brief description of second choice (10-15 words)"
     }}
     Only return the JSON, nothing else.
+    Write the choices in Bengali (Bangla) language.
     """
     
     try:
@@ -149,8 +153,8 @@ def generate_choices(current_scene, genre):
         st.warning(f"Error generating choices: {str(e)}. Using fallback choices.")
         # Fallback to default choices if there's an error
         return {
-            "choice1": "Continue cautiously and investigate further",
-            "choice2": "Take a bold approach and face the situation head-on"
+            "choice1": "সাবধানে অগ্রসর হন এবং আরও অনুসন্ধান করুন",  # Continue cautiously and investigate further in Bengali
+            "choice2": "একটি সাহসী পদ্ধতি নিন এবং পরিস্থিতির মুখোমুখি হন"  # Take a bold approach and face the situation head-on in Bengali
         }
 
 # Function to generate next scene based on choice
@@ -163,6 +167,7 @@ def generate_next_scene(current_scene, chosen_choice, genre):
     The protagonist decides to: {chosen_choice}
     
     Continue the story with an engaging scene (150-200 words) based on this choice. Make it vivid and immersive.
+    Write this in Bengali (Bangla) language only.
     """
     
     result = generate_story(prompt)
@@ -206,25 +211,25 @@ def main():
     lotties = get_lotties()
     
     # Title and introduction
-    st.title("🔮 Interactive Story Adventure")
+    st.title("🔮 ইন্টারেক্টিভ গল্প অ্যাডভেঞ্চার")  # Interactive Story Adventure in Bengali
     
     # Sidebar for navigation and settings
     with st.sidebar:
-        st.header("Game Settings")
+        st.header("গেম সেটিংস")  # Game Settings in Bengali
         
-        if st.button("Reset Game"):
+        if st.button("গেম রিসেট করুন"):  # Reset Game in Bengali
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
             
         st.markdown("---")
-        st.markdown("### How to Play")
+        st.markdown("### কিভাবে খেলবেন")  # How to Play in Bengali
         st.markdown("""
-        1. Enter your name and select a genre
-        2. Read the story that unfolds
-        3. Make choices to shape your adventure
-        4. After 20 choices, your story will conclude
-        5. Download your complete adventure!
+        1. আপনার নাম দিন এবং একটি গল্পের ধরন বাছাই করুন
+        2. গল্পটি পড়ুন যা উন্মোচিত হচ্ছে
+        3. আপনার অ্যাডভেঞ্চার আকার দেওয়ার জন্য পছন্দ করুন
+        4. 20টি পছন্দের পরে, আপনার গল্প শেষ হবে
+        5. আপনার সম্পূর্ণ অ্যাডভেঞ্চার ডাউনলোড করুন!
         """)
     
     # Game start screen
@@ -232,34 +237,34 @@ def main():
         col1, col2 = st.columns([3, 2])
         
         with col1:
-            st.header("Welcome to your personalized adventure!")
+            st.header("আপনার ব্যক্তিগতকৃত অ্যাডভেঞ্চারে স্বাগতম!")  # Welcome to your personalized adventure in Bengali
             st.markdown("""
-            This interactive story game uses AI to create a unique adventure just for you. 
-            Your choices will shape the narrative and lead to different outcomes.
+            এই ইন্টারেক্টিভ গল্প গেমটি আপনার জন্য একটি অনন্য অ্যাডভেঞ্চার তৈরি করতে AI ব্যবহার করে।
+            আপনার পছন্দগুলি গল্পের গতিপথ আকার দেবে এবং বিভিন্ন ফলাফলে পৌঁছাবে।
             
-            To begin, enter your name and select a genre for your adventure.
+            শুরু করতে, আপনার নাম লিখুন এবং আপনার অ্যাডভেঞ্চারের জন্য একটি ধরন নির্বাচন করুন।
             """)
             
             # Player name input
-            player_name = st.text_input("Your Name", placeholder="Enter your name")
+            player_name = st.text_input("আপনার নাম", placeholder="আপনার নাম লিখুন")  # Your Name in Bengali
             
             # Genre selection
             genre_options = {
-                "adventure": "Adventure 🏞️",
-                "horror": "Horror 👻",
-                "romance": "Romance ❤️",
-                "fantasy": "Fantasy 🧙‍♂️",
-                "mystery": "Mystery 🔍",
-                "sci_fi": "Science Fiction 🚀"
+                "adventure": "অ্যাডভেঞ্চার 🏞️",  # Adventure in Bengali
+                "horror": "হরর 👻",  # Horror in Bengali
+                "romance": "রোমান্স ❤️",  # Romance in Bengali
+                "fantasy": "ফ্যান্টাসি 🧙‍♂️",  # Fantasy in Bengali
+                "mystery": "মিস্টেরি 🔍",  # Mystery in Bengali
+                "sci_fi": "সায়েন্স ফিকশন 🚀"  # Science Fiction in Bengali
             }
             
-            selected_genre = st.selectbox("Choose your story genre", list(genre_options.values()))
+            selected_genre = st.selectbox("আপনার গল্পের ধরন বাছাই করুন", list(genre_options.values()))  # Choose your story genre in Bengali
             
             # Map the display name back to the key
             selected_genre_key = list(genre_options.keys())[list(genre_options.values()).index(selected_genre)]
             
             # Start game button
-            if st.button("Start Your Adventure") and player_name:
+            if st.button("আপনার অ্যাডভেঞ্চার শুরু করুন") and player_name:  # Start Your Adventure in Bengali
                 st.session_state.player_name = player_name
                 st.session_state.genre = selected_genre_key
                 
@@ -268,10 +273,11 @@ def main():
                 Create an engaging opening scene for a {selected_genre_key} story where the protagonist is named {player_name}.
                 Set the scene (about 150 words) with an interesting situation that will lead to choices.
                 Make it immersive and end at a point where the protagonist needs to make a decision.
+                Write this in Bengali (Bangla) language only.
                 """
                 
                 try:
-                    with st.spinner("Creating your adventure..."):
+                    with st.spinner("আপনার অ্যাডভেঞ্চার তৈরি করা হচ্ছে..."):  # Creating your adventure in Bengali
                         initial_scene = generate_story(initial_prompt)
                         st.session_state.current_scene = initial_scene
                         st.session_state.story_log.append(("narrator", initial_scene))
@@ -283,7 +289,7 @@ def main():
                     st.session_state.start_game = True
                     st.rerun()
                 except Exception as e:
-                    st.error(f"Error starting the game: {str(e)}. Please check if the Hugging Face API key is correctly set in the secrets.")
+                    st.error(f"গেম শুরু করতে ত্রুটি: {str(e)}। অনুগ্রহ করে দেখুন Gemini API কী সঠিকভাবে সেট করা আছে কিনা।")  # Error message in Bengali
             
         with col2:
             # Display the Lottie animation for the selected genre
@@ -295,12 +301,12 @@ def main():
     # Game in progress
     elif st.session_state.start_game and not st.session_state.game_over:
         # Display current scene
-        st.markdown(f"### {st.session_state.player_name}'s {st.session_state.genre.capitalize()} Adventure")
+        st.markdown(f"### {st.session_state.player_name}'s {st.session_state.genre.capitalize()} অ্যাডভেঞ্চার")  # Adventure in Bengali
         
         # Progress bar
         progress = min(st.session_state.choice_count / 20, 1.0)
         st.progress(progress)
-        st.markdown(f"Decision point: {st.session_state.choice_count}/20")
+        st.markdown(f"সিদ্ধান্তের পয়েন্ট: {st.session_state.choice_count}/20")  # Decision point in Bengali
         
         # Display current scene
         st.markdown('<div class="story-text">', unsafe_allow_html=True)
@@ -308,7 +314,7 @@ def main():
         st.markdown('</div>', unsafe_allow_html=True)
         
         # Display choices
-        st.markdown("### What will you do?")
+        st.markdown("### আপনি কি করবেন?")  # What will you do? in Bengali
         col1, col2 = st.columns(2)
         
         with col1:
@@ -316,7 +322,7 @@ def main():
                 chosen_choice = st.session_state.choices["choice1"]
                 st.session_state.story_log.append(("player", chosen_choice))
                 
-                with st.spinner("Continuing your adventure..."):
+                with st.spinner("আপনার অ্যাডভেঞ্চার চালিয়ে যাওয়া হচ্ছে..."):  # Continuing your adventure in Bengali
                     # Generate next scene
                     next_scene = generate_next_scene(
                         st.session_state.current_scene,
@@ -369,7 +375,7 @@ def main():
     
     # Game over screen
     elif st.session_state.game_over:
-        st.header("🎉 Your Adventure is Complete!")
+        st.header("🎉 আপনার অ্যাডভেঞ্চার সম্পূর্ণ হয়েছে!")  # Your Adventure is Complete! in Bengali
         
         # Generate conclusion
         if "conclusion" not in st.session_state:
@@ -379,9 +385,10 @@ def main():
             {st.session_state.current_scene}
             
             Make it feel like a natural ending that wraps up the adventure for {st.session_state.player_name}.
+            Write this in Bengali (Bangla) language only.
             """
             
-            with st.spinner("Generating the conclusion to your adventure..."):
+            with st.spinner("আপনার অ্যাডভেঞ্চারের সমাপ্তি তৈরি করা হচ্ছে..."):  # Generating the conclusion to your adventure in Bengali
                 conclusion = generate_story(conclusion_prompt)
                 st.session_state.conclusion = conclusion
                 st.session_state.story_log.append(("narrator", conclusion))
@@ -401,11 +408,11 @@ def main():
                 full_story += f"{text}\n\n"
         
         # Create download button for the story
-        st.markdown("### Download Your Complete Adventure")
+        st.markdown("### আপনার সম্পূর্ণ অ্যাডভেঞ্চার ডাউনলোড করুন")  # Download Your Complete Adventure in Bengali
         st.markdown(get_download_link(full_story, f"{st.session_state.player_name}_{st.session_state.genre}_adventure.txt"), unsafe_allow_html=True)
         
         # Option to play again
-        if st.button("Play Again with a New Story"):
+        if st.button("নতুন গল্প দিয়ে আবার খেলুন"):  # Play Again with a New Story in Bengali
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
@@ -413,9 +420,9 @@ def main():
     # Footer
     st.markdown("""
     <div class="footer">
-        Powered by Streamlit and Hugging Face AI
+        স্ট্রিমলিট এবং Google Gemini AI দ্বারা পরিচালিত
     </div>
-    """, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)  # Powered by Streamlit and Google Gemini AI in Bengali
 
 if __name__ == "__main__":
     main()
