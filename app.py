@@ -8,6 +8,7 @@ import io
 import base64
 import pandas as pd
 import streamlit_lottie as st_lottie
+from huggingface_hub import InferenceClient
 
 # Set page configuration
 st.set_page_config(
@@ -69,36 +70,41 @@ def get_lotties():
     }
     return lotties
 
-# Function to generate story using Hugging Face API (Deepseek model)
-def generate_story(prompt, api_key, model="deepseek-ai/deepseek-coder-33b-instruct"):
-    API_URL = f"https://api-inference.huggingface.co/models/{model}"
-    headers = {"Authorization": f"Bearer {api_key}"}
-    
-    payload = {
-        "inputs": prompt,
-        "parameters": {
-            "max_new_tokens": 250,
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "do_sample": True
-        }
-    }
-    
+# Function to generate story using Hugging Face's InferenceClient (DeepSeek-R1 model)
+def generate_story(prompt, model="deepseek-ai/DeepSeek-R1"):
     try:
-        response = requests.post(API_URL, headers=headers, json=payload)
-        result = response.json()
+        # Get API key from Streamlit secrets
+        api_key = st.secrets["huggingface"]["api_key"]
+        provider = st.secrets["huggingface"]["provider"]
         
-        # Handle different response formats
-        if isinstance(result, list) and len(result) > 0 and "generated_text" in result[0]:
-            return result[0]["generated_text"]
-        elif isinstance(result, dict) and "generated_text" in result:
-            return result["generated_text"]
-        elif isinstance(result, list) and len(result) > 0:
-            return result[0]
-        else:
-            return "Error: Unexpected response format. Please try again."
+        # Initialize the client
+        client = InferenceClient(
+            provider=provider,
+            api_key=api_key
+        )
+        
+        # Create messages for the chat completion
+        messages = [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+        
+        # Generate completion
+        completion = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_tokens=250,
+            temperature=0.7,
+            top_p=0.9
+        )
+        
+        # Return the generated text
+        return completion.choices[0].message.content
     except Exception as e:
-        return f"Error generating story: {str(e)}"
+        st.error(f"Error generating story: {str(e)}")
+        return f"Error generating story. Please check your API configuration. Error: {str(e)}"
 
 # Function to generate story choices
 def generate_choices(current_scene, genre, api_key):
@@ -141,7 +147,7 @@ def generate_choices(current_scene, genre, api_key):
         }
 
 # Function to generate next scene based on choice
-def generate_next_scene(current_scene, chosen_choice, genre, api_key):
+def generate_next_scene(current_scene, chosen_choice, genre):
     prompt = f"""
     In this {genre} story:
     
@@ -152,7 +158,7 @@ def generate_next_scene(current_scene, chosen_choice, genre, api_key):
     Continue the story with an engaging scene (150-200 words) based on this choice. Make it vivid and immersive.
     """
     
-    result = generate_story(prompt, api_key)
+    result = generate_story(prompt)
     
     # Clean up the result to get just the new scene
     if current_scene in result:
@@ -198,12 +204,11 @@ def main():
     # Sidebar for navigation and settings
     with st.sidebar:
         st.header("Game Settings")
-        huggingface_api_key = st.text_input("Enter Hugging Face API Key", type="password")
         
         if st.button("Reset Game"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
-            st.rerun()
+            st.experimental_rerun()
             
         st.markdown("---")
         st.markdown("### How to Play")
@@ -247,7 +252,7 @@ def main():
             selected_genre_key = list(genre_options.keys())[list(genre_options.values()).index(selected_genre)]
             
             # Start game button
-            if st.button("Start Your Adventure") and player_name and huggingface_api_key:
+            if st.button("Start Your Adventure") and player_name:
                 st.session_state.player_name = player_name
                 st.session_state.genre = selected_genre_key
                 
@@ -258,20 +263,20 @@ def main():
                 Make it immersive and end at a point where the protagonist needs to make a decision.
                 """
                 
-                with st.spinner("Creating your adventure..."):
-                    initial_scene = generate_story(initial_prompt, huggingface_api_key)
-                    st.session_state.current_scene = initial_scene
-                    st.session_state.story_log.append(("narrator", initial_scene))
+                try:
+                    with st.spinner("Creating your adventure..."):
+                        initial_scene = generate_story(initial_prompt)
+                        st.session_state.current_scene = initial_scene
+                        st.session_state.story_log.append(("narrator", initial_scene))
+                        
+                        # Generate initial choices
+                        initial_choices = generate_choices(initial_scene, selected_genre_key)
+                        st.session_state.choices = initial_choices
                     
-                    # Generate initial choices
-                    initial_choices = generate_choices(initial_scene, selected_genre_key, huggingface_api_key)
-                    st.session_state.choices = initial_choices
-                
-                st.session_state.start_game = True
-                st.rerun()
-            
-            elif not huggingface_api_key and st.button("Start Your Adventure"):
-                st.error("Please enter your Hugging Face API key to start the game")
+                    st.session_state.start_game = True
+                    st.experimental_rerun()
+                except Exception as e:
+                    st.error(f"Error starting the game: {str(e)}. Please check if the Hugging Face API key is correctly set in the secrets.")
                 
         with col2:
             # Display the Lottie animation for the selected genre
@@ -309,8 +314,7 @@ def main():
                     next_scene = generate_next_scene(
                         st.session_state.current_scene,
                         chosen_choice,
-                        st.session_state.genre,
-                        huggingface_api_key
+                        st.session_state.genre
                     )
                     
                     # Update game state
@@ -323,10 +327,10 @@ def main():
                         st.session_state.game_over = True
                     else:
                         # Generate new choices
-                        new_choices = generate_choices(next_scene, st.session_state.genre, huggingface_api_key)
+                        new_choices = generate_choices(next_scene, st.session_state.genre)
                         st.session_state.choices = new_choices
                 
-                st.rerun()
+                st.experimental_rerun()
                 
         with col2:
             if st.button(st.session_state.choices.get("choice2", "Option 2"), key="btn_choice2", help="Select this path for your story"):
@@ -338,8 +342,7 @@ def main():
                     next_scene = generate_next_scene(
                         st.session_state.current_scene,
                         chosen_choice,
-                        st.session_state.genre,
-                        huggingface_api_key
+                        st.session_state.genre
                     )
                     
                     # Update game state
@@ -352,10 +355,10 @@ def main():
                         st.session_state.game_over = True
                     else:
                         # Generate new choices
-                        new_choices = generate_choices(next_scene, st.session_state.genre, huggingface_api_key)
+                        new_choices = generate_choices(next_scene, st.session_state.genre)
                         st.session_state.choices = new_choices
                 
-                st.rerun()
+                st.experimental_rerun()
     
     # Game over screen
     elif st.session_state.game_over:
@@ -372,7 +375,7 @@ def main():
             """
             
             with st.spinner("Generating the conclusion to your adventure..."):
-                conclusion = generate_story(conclusion_prompt, huggingface_api_key)
+                conclusion = generate_story(conclusion_prompt)
                 st.session_state.conclusion = conclusion
                 st.session_state.story_log.append(("narrator", conclusion))
         
@@ -398,7 +401,7 @@ def main():
         if st.button("Play Again with a New Story"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
-            st.rerun()
+            st.experimental_rerun()
     
     # Footer
     st.markdown("""
