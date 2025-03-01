@@ -13,7 +13,7 @@ import streamlit_lottie as st_lottie
 st.set_page_config(
     page_title="ইন্টারেক্টিভ গল্প অ্যাডভেঞ্চার",  # Interactive Story Adventure in Bengali
     page_icon="📖",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state="expanded"
 )
 
