@@ -20,6 +20,12 @@ st.set_page_config(
 # Custom CSS for a clean, modern UI
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla&display=swap');
+    
+    * {
+        font-family: 'Tiro Bangla', serif;
+    }
+    
     .main {
         background-color: #f5f5f5;
     }
@@ -28,23 +34,38 @@ st.markdown("""
         border-radius: 5px;
         height: 3em;
         font-weight: 500;
+        font-family: 'Tiro Bangla', serif;
     }
     .story-text {
         background-color: white;
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-family: 'Tiro Bangla', serif;
+        font-size: 1.1em;
+        line-height: 1.6;
     }
     .choice-button {
         margin-top: 10px;
     }
     h1, h2, h3 {
         color: #1E1E1E;
+        font-family: 'Tiro Bangla', serif;
     }
     .footer {
         margin-top: 30px;
         text-align: center;
         color: #888888;
+        font-family: 'Tiro Bangla', serif;
+    }
+    .stTextInput > div > div > input {
+        font-family: 'Tiro Bangla', serif;
+    }
+    .stSelectbox > div > div > div {
+        font-family: 'Tiro Bangla', serif;
+    }
+    p, span, label, div {
+        font-family: 'Tiro Bangla', serif;
     }
 </style>
 """, unsafe_allow_html=True)
